@@ -89,7 +89,13 @@ module CapistranoResque
           # CONT - Start to process new jobs again after a USR2 (resume)
           desc "Quit running Resque workers"
           task :stop, :roles => lambda { workers_roles() }, :on_no_matching_servers => :continue do
-            run(stop_command)
+            begin
+              run(stop_command)
+              run("rm #{current_path}/tmp/pids/resque_work*.pid")
+            rescue => e
+              puts "Could not kill process: Error: #{e.message}"
+            end
+
           end
 
           desc "Restart running Resque workers"
