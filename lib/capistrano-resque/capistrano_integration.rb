@@ -12,7 +12,7 @@ module CapistranoResque
 
         def workers_roles
           return workers.keys if workers.first[1].is_a? Hash
-          [:resque_worker]
+          [:web]
         end
 
         def for_each_workers(&block)
@@ -21,7 +21,7 @@ module CapistranoResque
               yield(role.to_sym, workers[role.to_sym])
             end
           else
-            yield(:resque_worker,workers)
+            yield(:web,workers)
           end
         end
 
@@ -100,13 +100,13 @@ module CapistranoResque
 
           namespace :scheduler do
             desc "Starts resque scheduler with default configs"
-            task :start, :roles => :resque_scheduler do
+            task :start, :roles => :web do
               pid = "#{current_path}/tmp/pids/scheduler.pid"
               run(start_scheduler(pid))
             end
 
             desc "Stops resque scheduler"
-            task :stop, :roles => :resque_scheduler do
+            task :stop, :roles => :web do
               pid = "#{current_path}/tmp/pids/scheduler.pid"
               run(stop_scheduler(pid))
             end
