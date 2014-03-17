@@ -41,7 +41,8 @@ module CapistranoResque
         def stop_command
           "if [ -e #{current_path}/tmp/pids/resque_work_1.pid ]; then \
            for f in `ls #{current_path}/tmp/pids/resque_work*.pid`; \
-             do #{try_sudo} kill -s #{resque_kill_signal} `cat $f` \
+             do if ! #{try_sudo} kill -s #{resque_kill_signal} `cat $f`; then \
+               echo \"Could not kill process\" >&2 ;fi \
              && rm $f ;done \
            ;fi"
         end
@@ -91,8 +92,7 @@ module CapistranoResque
           task :stop, :roles => lambda { workers_roles() }, :on_no_matching_servers => :continue do
             begin
               run(stop_command)
-              run("rm #{current_path}/tmp/pids/resque_work*.pid")
-            rescue => e
+            rescue Exception => e
               puts "Could not kill process: Error: #{e.message}"
             end
 
